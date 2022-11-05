@@ -1,239 +1,183 @@
-(function ($)
-  { "use strict"
-  
-/* 1. Proloder */
-    $(window).on('load', function () {
-      $('#preloader-active').delay(450).fadeOut('slow');
-      $('body').delay(450).css({
-        'overflow': 'visible'
-      });
-    });
+/**
+* Template Name: Sailor - v4.9.1
+* Template URL: https://bootstrapmade.com/sailor-free-bootstrap-theme/
+* Author: BootstrapMade.com
+* License: https://bootstrapmade.com/license/
+*/
+(function() {
+  "use strict";
 
+  /**
+   * Easy selector helper function
+   */
+  const select = (el, all = false) => {
+    el = el.trim()
+    if (all) {
+      return [...document.querySelectorAll(el)]
+    } else {
+      return document.querySelector(el)
+    }
+  }
 
-/* 2. slick Nav */
-// mobile_menu
-    var menu = $('ul#navigation');
-    if(menu.length){
-      menu.slicknav({
-        prependTo: ".mobile_menu",
-        closedSymbol: '+',
-        openedSymbol:'-'
-      });
-    };
+  /**
+   * Easy event listener function
+   */
+  const on = (type, el, listener, all = false) => {
+    let selectEl = select(el, all)
+    if (selectEl) {
+      if (all) {
+        selectEl.forEach(e => e.addEventListener(type, listener))
+      } else {
+        selectEl.addEventListener(type, listener)
+      }
+    }
+  }
 
+  /**
+   * Easy on scroll event listener 
+   */
+  const onscroll = (el, listener) => {
+    el.addEventListener('scroll', listener)
+  }
 
-/* 3. MainSlider-1 */
-    function mainSlider() {
-      var BasicSlider = $('.slider-active');
-      BasicSlider.on('init', function (e, slick) {
-        var $firstAnimatingElements = $('.single-slider:first-child').find('[data-animation]');
-        doAnimations($firstAnimatingElements);
-      });
-      BasicSlider.on('beforeChange', function (e, slick, currentSlide, nextSlide) {
-        var $animatingElements = $('.single-slider[data-slick-index="' + nextSlide + '"]').find('[data-animation]');
-        doAnimations($animatingElements);
-      });
-      BasicSlider.slick({
-        autoplay: false,
-        autoplaySpeed: 10000,
-        dots: false,
-        fade: true,
-        arrows: false,
-        prevArrow: '<button type="button" class="slick-prev"><i class="ti-shift-left"></i></button>',
-        nextArrow: '<button type="button" class="slick-next"><i class="ti-shift-right"></i></button>',
-        responsive: [{
-            breakpoint: 1024,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              infinite: true,
-            }
-          },
-          {
-            breakpoint: 991,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              arrows: false
-            }
-          },
-          {
-            breakpoint: 767,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              arrows: false
-            }
-          }
-        ]
+  /**
+   * Toggle .header-scrolled class to #header when page is scrolled
+   */
+  let selectHeader = select('#header')
+  if (selectHeader) {
+    const headerScrolled = () => {
+      if (window.scrollY > 100) {
+        selectHeader.classList.add('header-scrolled')
+      } else {
+        selectHeader.classList.remove('header-scrolled')
+      }
+    }
+    window.addEventListener('load', headerScrolled)
+    onscroll(document, headerScrolled)
+  }
+
+  /**
+   * Back to top button
+   */
+  let backtotop = select('.back-to-top')
+  if (backtotop) {
+    const toggleBacktotop = () => {
+      if (window.scrollY > 100) {
+        backtotop.classList.add('active')
+      } else {
+        backtotop.classList.remove('active')
+      }
+    }
+    window.addEventListener('load', toggleBacktotop)
+    onscroll(document, toggleBacktotop)
+  }
+
+  /**
+   * Mobile nav toggle
+   */
+  on('click', '.mobile-nav-toggle', function(e) {
+    select('#navbar').classList.toggle('navbar-mobile')
+    this.classList.toggle('bi-list')
+    this.classList.toggle('bi-x')
+  })
+
+  /**
+   * Mobile nav dropdowns activate
+   */
+  on('click', '.navbar .dropdown > a', function(e) {
+    if (select('#navbar').classList.contains('navbar-mobile')) {
+      e.preventDefault()
+      this.nextElementSibling.classList.toggle('dropdown-active')
+    }
+  }, true)
+
+  /**
+   * Hero carousel indicators
+   */
+  let heroCarouselIndicators = select("#hero-carousel-indicators")
+  let heroCarouselItems = select('#heroCarousel .carousel-item', true)
+
+  heroCarouselItems.forEach((item, index) => {
+    (index === 0) ?
+    heroCarouselIndicators.innerHTML += "<li data-bs-target='#heroCarousel' data-bs-slide-to='" + index + "' class='active'></li>":
+      heroCarouselIndicators.innerHTML += "<li data-bs-target='#heroCarousel' data-bs-slide-to='" + index + "'></li>"
+  });
+
+  /**
+   * Porfolio isotope and filter
+   */
+  window.addEventListener('load', () => {
+    let portfolioContainer = select('.portfolio-container');
+    if (portfolioContainer) {
+      let portfolioIsotope = new Isotope(portfolioContainer, {
+        itemSelector: '.portfolio-item'
       });
 
-      function doAnimations(elements) {
-        var animationEndEvents = 'webkitAnimationEnd mozAnimationEnd MSAnimationEnd oanimationend animationend';
-        elements.each(function () {
-          var $this = $(this);
-          var $animationDelay = $this.data('delay');
-          var $animationType = 'animated ' + $this.data('animation');
-          $this.css({
-            'animation-delay': $animationDelay,
-            '-webkit-animation-delay': $animationDelay
-          });
-          $this.addClass($animationType).one(animationEndEvents, function () {
-            $this.removeClass($animationType);
-          });
+      let portfolioFilters = select('#portfolio-flters li', true);
+
+      on('click', '#portfolio-flters li', function(e) {
+        e.preventDefault();
+        portfolioFilters.forEach(function(el) {
+          el.classList.remove('filter-active');
+        });
+        this.classList.add('filter-active');
+
+        portfolioIsotope.arrange({
+          filter: this.getAttribute('data-filter')
+        });
+      }, true);
+    }
+
+  });
+
+  /**
+   * Initiate portfolio lightbox 
+   */
+  const portfolioLightbox = GLightbox({
+    selector: '.portfolio-lightbox'
+  });
+
+  /**
+   * Portfolio details slider
+   */
+  new Swiper('.portfolio-details-slider', {
+    speed: 400,
+    loop: true,
+    autoplay: {
+      delay: 5000,
+      disableOnInteraction: false
+    },
+    pagination: {
+      el: '.swiper-pagination',
+      type: 'bullets',
+      clickable: true
+    }
+  });
+
+  /**
+   * Initiate portfolio details lightbox 
+   */
+  const portfolioDetailsLightbox = GLightbox({
+    selector: '.portfolio-details-lightbox',
+    width: '90%',
+    height: '90vh'
+  });
+
+  /**
+   * Skills animation
+   */
+  let skilsContent = select('.skills-content');
+  if (skilsContent) {
+    new Waypoint({
+      element: skilsContent,
+      offset: '80%',
+      handler: function(direction) {
+        let progress = select('.progress .progress-bar', true);
+        progress.forEach((el) => {
+          el.style.width = el.getAttribute('aria-valuenow') + '%'
         });
       }
-    }
-    mainSlider();
+    })
+  }
 
-
-
-/* 4. Testimonial Active*/
-    var testimonial = $('.h1-testimonial-active');
-    if(testimonial.length){
-    testimonial.slick({
-        dots: true,
-        infinite: true,
-        speed: 500,
-        autoplay:true,
-        arrows: false,
-        prevArrow: '<button type="button" class="slick-prev"><i class="ti-angle-left"></i></button>',
-        nextArrow: '<button type="button" class="slick-next"><i class="ti-angle-right"></i></button>',
-        slidesToShow: 1,
-        slidesToScroll: 1,
-        responsive: [
-          {
-            breakpoint: 1024,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              infinite: true,
-              arrow:false
-            }
-          },
-          {
-            breakpoint: 600,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              arrows:false
-            }
-          },
-          {
-            breakpoint: 480,
-            settings: {
-              slidesToShow: 1,
-              slidesToScroll: 1,
-              arrows:false,
-            }
-          }
-        ]
-      });
-    }
-
-/* 5. Gallery Active */
-    var client_list = $('.completed-active');
-    if(client_list.length){
-      client_list.owlCarousel({
-        slidesToShow: 2,
-        slidesToScroll: 1,
-        loop: true,
-        autoplay:true,
-        speed: 3000,
-        smartSpeed:2000,
-        nav: false,
-        dots: false,
-        margin: 15,
-
-        autoplayHoverPause: true,
-        responsive : {
-          0 : {
-            items: 1
-          },
-          768 : {
-            items: 2
-          },
-          992 : {
-            items: 2
-          },
-          1200:{
-            items: 3
-          }
-        }
-      });
-    }
-
-
-/* 6. Nice Selectorp  */
-  var nice_Select = $('select');
-    if(nice_Select.length){
-      nice_Select.niceSelect();
-    }
-
-/* 7.  Custom Sticky Menu  */
-    $(window).on('scroll', function () {
-      var scroll = $(window).scrollTop();
-      if (scroll < 245) {
-        $(".header-sticky").removeClass("sticky-bar");
-      } else {
-        $(".header-sticky").addClass("sticky-bar");
-      }
-    });
-
-    $(window).on('scroll', function () {
-      var scroll = $(window).scrollTop();
-      if (scroll < 245) {
-          $(".header-sticky").removeClass("sticky");
-      } else {
-          $(".header-sticky").addClass("sticky");
-      }
-    });
-
-
-
-/* 8. sildeBar scroll */
-    $.scrollUp({
-      scrollName: 'scrollUp', // Element ID
-      topDistance: '300', // Distance from top before showing element (px)
-      topSpeed: 300, // Speed back to top (ms)
-      animation: 'fade', // Fade, slide, none
-      animationInSpeed: 200, // Animation in speed (ms)
-      animationOutSpeed: 200, // Animation out speed (ms)
-      scrollText: '<i class="ti-arrow-up"></i>', // Text for element
-      activeOverlay: false, // Set CSS color to display scrollUp active point, e.g '#00FFFF'
-    });
-
-
-/* 9. data-background */
-    $("[data-background]").each(function () {
-      $(this).css("background-image", "url(" + $(this).attr("data-background") + ")")
-      });
-
-
-/* 10. WOW active */
-    new WOW().init();
-
-/* 11. Datepicker */
-    
-// 11. ---- Mailchimp js --------//  
-    function mailChimp() {
-      $('#mc_embed_signup').find('form').ajaxChimp();
-    }
-    mailChimp();
-
-
-// 12 Pop Up Img
-    var popUp = $('.single_gallery_part, .img-pop-up');
-      if(popUp.length){
-        popUp.magnificPopup({
-          type: 'image',
-          gallery:{
-            enabled:true
-          }
-        });
-      }
-
-
-
-
-})(jQuery);
+})()
